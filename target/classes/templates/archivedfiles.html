@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArchivSystem</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="icon" type="image/vnd.microsoft.icon" href="images/DA-Tab-Logo.ico">
+
+</head>
+<body>
+<div class="wrapper">
+    <div class="logo-form">
+        <a href="/"><h2>DatenArchiv</h2></a>
+    </div>
+     <form name="searchform" th:action="@{/search}" method="get"> 
+    <div class="search-field">
+        <div class="input-group">
+               <input type="text" name="search_DB" class="form-control rounded" placeholder="Search" aria-label="Search"
+                aria-describedby="search-addon" />
+             <input type="submit" class="btn btn-outline-primary" name="submit" value="Search"/>
+        </div>
+    </div>
+
+</form>
+
+    <div class="upload-temp">
+        <div id="upload-box">
+            <a href="/newdatenhochladen"><img src="images/upload.png" alt="hochladen">hochladen</a>
+        </div>
+
+    </div>
+    
+    <div class="logout">
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+    <div class="username" th:text="${#authentication.name}">
+    </div>
+    <div class="admin-container" sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+        <a href="/admin">Admin</a>
+    </div>
+</div>
+<div>
+    <div class="list-group">
+        <a href="#" class="list-group-item list-group-item-action" id="favorit"><img src="images/star%2016px.png" alt="favorit list">Favoritenliste</a>
+         <a th:href="@{/patient}" class="list-group-item list-group-item-action">Patient </a>
+        <a th:href="@{/observation}" class="list-group-item list-group-item-action">Observation</a>
+        <a th:href="@{/diagnostic}" class="list-group-item list-group-item-action">Diagnostic report</a>
+        <a th:href="@{/archivedfiles}" class="list-group-item list-group-item-action">Alle Ressourcen</a>
+    </div> 
+    <div class="list-file">
+        <h3>Resourcen</h3>
+        <table class="table table-striped" id="myTable">
+            <thead class ="headLink">
+            <tr>
+                <th scope="col"><a th:href="@{/dateiName}">Title</a></th>
+                <th scope="col"><a th:href="@{/datum}">erstellt am</a></th>
+                <th scope="col"><a th:href="@{/username}">erstellt von</a></th>
+                <th scope="col"><a th:href="@{/groesse}">Dateigröße</a></th>
+                <th scope="col">Version</th>
+                <th scope="col">Datei</th>
+       
+            </tr>
+            </thead>
+            <tbody>
+         
+          <tr th:if="${metadaten.empty}">
+            <td colspan="2"> Kein Ergebnis oder Datenbank leer </td>
+            </tr>
+             <tr th:each="metadata : ${metadaten}">
+            <td><span th:text="${metadata.getTitle}"> Title </span></td>
+            <td><span th:text="${metadata.getErstellt_am}"> erstellt_am </span></td>
+             <td><span th:text="${metadata.getErstellt_von}"> erstellt_von </span></td>
+            <td><span th:text="${metadata.getDateiGroesse} + ' Kb'"></span></td>
+             <td><span th:text="${metadata.getVersion}"> Version </span></td>
+            <td> <a th:href="@{'/downloadFile/'+${metadata.getId}}"><img src="images/download.png" alt="download"></a></td>
+        </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+</body>
+</html>

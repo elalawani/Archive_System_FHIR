@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArchivSystem</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="icon" type="image/vnd.microsoft.icon" href="images/DA-Tab-Logo.ico">
+
+</head>
+<body>
+<div class="wrapper">
+    <div class="logo-form">
+        <a href="/"><h2>DatenArchiv</h2></a>
+    </div>
+    <div class="willkommen">
+        <h1>
+            Willkommen zum DatenArchiv</h1>
+    </div>
+    <div class="logout">
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+    <div class="username" th:text="${#authentication.name}">
+    </div>
+    <div class="admin-container" sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+        <a href="/admin">Admin</a>
+    </div>
+</div>
+<div class="upload-form">
+        <h3>User aktualisieren</h3>
+        <form  th:action="@{/saveUser}" th:object="${users}" method="post">
+            <input type="hidden" th:field="*{user_id}">
+            <div class="new-user">
+                <label>Username:</label>
+                <input type="text" th:field="*{username}" >
+                <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="invalid"></div>
+            </div>
+            <div class="new-user">
+                <label>Password:</label>
+                <input type="password" th:field="*{password}" >
+                <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+            </div>
+            <div class="new-user">
+                <label >Role:</label>
+                <select th:field="*{roles}">
+                    <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+                    <option value="ROLE_USER">ROLE_USER</option>
+                </select>
+            </div>
+            <div class="new-user">
+                <label >Active:</label>
+                <select th:field="*{active}">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </div>
+            <div class="btn-add-user">
+                <input type="submit" name="add-user" value="Save">
+            </div>
+        </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArchivSystem</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="icon" type="image/vnd.microsoft.icon" href="images/DA-Tab-Logo.ico">
+
+</head>
+<body>
+<div class="wrapper">
+    <div class="logo-form">
+        <a href="/"><h2>DatenArchiv</h2></a>
+    </div>
+    <div class="willkommen">
+        <h1>Willkommen zum DatenArchiv</h1>
+    </div>
+    <div class="logout">
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+    <div class="username" th:text="${#authentication.name}">
+    </div>
+</div>
+
+<div class="row">
+    <section class="col-5">
+        <div class="registration-form">
+            <h3>Neu Benutzer hinzufügen</h3>
+            <form  th:action="@{/admin}" th:object="${user}" method="post">
+                <div class="new-user">
+                    <label>Username:</label>
+                    <input type="text" th:field="*{username}" required>
+                    <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="invalid"></div>
+                </div>
+                <div class="new-user">
+                    <label>Password:</label>
+                    <input type="password" th:field="*{password}" required>
+                    <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
+                <div class="new-user">
+                    <label >Role:</label>
+                    <select name="roles" th:value="*{roles}" required>
+                        <option value="" selected hidden>Default</option>
+                        <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+                        <option value="ROLE_USER">ROLE_USER</option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('roles')}" th:errors="*{roles}"></div>
+                </div>
+                <div class="btn-add-user">
+                    <input type="submit" name="add-user" value="User hinzufügen">
+                </div>
+            </form>
+        </div>
+    </section>
+    <section class="col-7">
+        <div class="userlist">
+            <h3>Userliste</h3>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Userid</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Active</th>
+                    <th scope="col">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each = "users : ${userslist}">
+                    <td th:text = "${users.user_id}">Userid</td>
+                    <td th:text = "${users.username}">Username</td>
+                    <td th:text = "${users.roles}">Role</td>
+                    <td th:text = "${users.active}">Active</td>
+                    <td>
+                        <a th:href="@{/edit/{id}(id=${users.user_id})}" class="btn btn-primary">Update</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+</body>
+</html>

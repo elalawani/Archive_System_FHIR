@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArchivSystem</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="icon" type="image/vnd.microsoft.icon" href="images/DA-Tab-Logo.ico">
+
+</head>
+<body>
+<div class="wrapper">
+    <div class="logo-form">
+        <h2>DatenArchiv</h2>
+    </div>
+    <div class="willkommen">
+        <h1>
+            Willkommen zum DatenArchiv</h1>
+    </div>
+    <div class="logout">
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+    <div class="username" th:text="${#authentication.name}">
+    </div>
+    <div class="admin-container" sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+        <a href="/admin">Admin</a>
+    </div>
+<!-- Error and success messages display-->
+<div th:each="messages : ${answerToDisplay}" th:if="${messages.contains('schon') || messages.contains('nicht') || messages.contains('zu')}" th:text="${messages}" class="alert alert-danger"></div>
+<div th:each="messages : ${answerToDisplay}" th:unless="${messages.contains('schon') || messages.contains('nicht') || messages.contains('zu')}" th:text="${messages}" class="alert alert-success"></div>
+<div th:if="${success_message}" th:text="${success_message}" class="alert alert-success"></div>
+    
+</div>
+<div class="main-button">
+    <form th:action="@{/newdatenhochladen}" method="get">
+        <div>
+            <button type="submit" name="btn-upload-main">Neue Daten hochladen</button>
+        </div></form>
+    <form th:action="@{/archivedfiles}" method="get">
+        <div>
+            <button type="submit" name="btn-open-file">Daten anzeigen</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

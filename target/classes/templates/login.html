@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <title>ArchivSystem</title>
+    <link rel="icon" type="image/vnd.microsoft.icon" href="images/DA-Tab-Logo.ico">
+    
+</head>
+<body>
+<div class="wrapper">
+    <h1>
+        DatenArchiv
+    </h1>
+    <h3>
+        Willkommen zum DatenArchiv
+    </h3>
+</div>
+<div class="login-form">
+    <h3>Login</h3>
+    <form th:action="@{/login}" method="post">
+        <fieldset>
+            <!-- Thymeleaf + Spring Security error display-->
+            <div th:if="${param.error}" class="alert alert-danger">
+                Invalid username or password.
+            </div>
+            <div th:if="${param.logout}" class="alert alert-success">
+                You have been logged out.
+            </div>
+            <div class="txt-field">
+                <label for="email">Username</label>
+                <input type="text" name="username" id="email">
+            </div>
+            <div class="txt-field">
+                <label for="pwd">Password</label>
+                <input type="password" name="password" id="pwd">
+            </div>
+            <div>
+                <input type="submit" name="submit" value="Login">
+            </div>
+        </fieldset>
+    </form>
+</div>
+</body>
+</html>

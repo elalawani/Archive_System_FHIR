@@ -1,0 +1,103 @@
+-- PROCEDURE: public.insertionnew(json, character varying, character varying, bytea, integer)
+
+-- DROP PROCEDURE public.insertionnew(json, character varying, character varying, bytea, integer);
+
+CREATE OR REPLACE PROCEDURE public.insertionnew(
+	jsontxt json,
+	datei_n character varying,
+	usern character varying,
+	datei_byte bytea,
+	INOUT resul integer)
+LANGUAGE 'plpgsql'
+AS $BODY$
+DECLARE r_ID text;
+DECLARE rTyp VARCHAR(100);
+DECLARE da_ID bigint DEFAULT(0);
+DECLARE meta_ID bigint DEFAULT(0);
+DECLARE patientRef text;
+DECLARE patientDatei_ID bigint DEFAULT(0);
+DECLARE countDN INT2 DEFAULT (0);
+DECLARE countRID INT2 DEFAULT (0);
+DECLARE countJson INT2 DEFAULT (0);
+DECLARE countReferenz INT2 DEFAULT (0);
+DECLARE isInserted INT2 DEFAULT(0);
+DECLARE versionControlle INT2 DEFAULT(0);
+DECLARE newVersion DECIMAL(2,1) ;
+DECLARE groess bigint;
+DECLARE herku bigint;
+
+Begin
+
+		 SELECT user_id INTO herku FROM users WHERE username LIKE usern;
+		 SELECT COUNT(metadaten_id) INTO meta_ID FROM metadaten;
+		 SELECT COUNT(datei_id) INTO da_ID FROM resources;
+	IF meta_ID=0 AND da_ID=0 THEN
+		SELECT 1 INTO meta_ID;
+		SELECT 1 INTO da_ID;
+	ELSE 
+	 SELECT MAX(metadaten_id)+1 INTO meta_ID FROM metadaten;
+	 SELECT MAX(datei_id)+1 INTO da_ID FROM resources;
+	END IF;
+	
+
+     SELECT (jsonTxt::json->>'id') INTO r_ID;
+     SELECT (jsonTxt::json->>'resourceType') INTO rTyp;
+     SELECT  ((jsonTxt::json#>>'{subject}')::json->>'reference') INTO patientRef;
+     SELECT COUNT(resourcen_id) INTO countReferenz FROM resources WHERE resourcen_id=patientRef;
+     SELECT MAX(datei_ID) INTO patientDatei_ID FROM resources WHERE resourcen_id=patientRef;
+   	 SELECT COUNT(datei_Name) INTO countDN FROM resources WHERE datei_name=datei_n;
+   	 SELECT COUNT(resourcen_id) INTO countRID FROM resources WHERE resourcen_id=r_ID;
+     SELECT COUNT(resourceinhalt) INTO countJson FROM resources WHERE (resourceinhalt::json#>'{}')::text =(jsonTxt::json#>'{}')::text;    
+    
+ IF countRID=0 AND countJson=0  THEN 
+ 
+ --Neue Datei mit Patientreferenz hinzufügen
+ --Output resul=1: 
+ 
+ 	IF countReferenz>0 THEN			
+    	INSERT INTO resources(datei_id,datei_name,resourcenTyp,resourcen_id,datei,resourceinhalt,patientReferenz) VALUES (da_ID,datei_n,rTyp,r_ID,datei_byte,jsonTxt,patientDatei_ID);
+       		 SELECT 1 INTO isInserted;
+			 SELECT 1 INTO resul;
+    ELSEIF countReferenz=0 THEN 
+	
+--Neue Datei ohne Patientreferenz hinzufügen
+--Output resul=2:
+        	INSERT INTO resources(datei_id,datei_name,resourcenTyp,resourcen_id,datei,resourceinhalt) VALUES (da_ID,datei_n,rTyp,r_ID,datei_byte,jsonTxt);
+            SELECT 1 INTO isInserted;
+			SELECT 2 INTO resul;
+ 	END IF;
+    
+ ELSEIF countRID>0 THEN
+ 	     IF countRID>0 AND countJson>0 THEN	
+
+--Datei existiert Schon
+--Output resul=0:
+			SELECT 0 INTO resul; 
+			
+       	ELSEIF countRID>0 AND countJson=0 THEN
+
+--Versionierung (neue Version der Datei wird hochgeladen)
+--Output resul=3:
+
+     SELECT Max(version) + 0.1 INTO newVersion FROM metadaten WHERE datei_resource IN (SELECT MAX(datei_id) FROM resources WHERE resourcen_id=r_ID );
+         		INSERT INTO resources(datei_id,datei_name,resourcenTyp,resourcen_id,datei,resourceinhalt,patientReferenz) VALUES (da_ID,datei_n,rTyp,r_ID,datei_byte,jsonTxt,patientDatei_ID);
+         SELECT 1 INTO versionControlle; 
+         SELECT 1 INTO isInserted;
+		 SELECT 3 INTO resul;
+ 		END IF;
+ END IF;
+ 
+ 
+ --Metadaten erst nach dem Upload hinzufügen
+ --mit der Dateigröße als Stringlänge und neue Version,
+ --wenn nötig.
+ 
+ SELECT LENGTH(jsonTxt::text) INTO groess;
+ IF isInserted>0 AND versionControlle=0 THEN
+ 	INSERT INTO metadaten(metadaten_id,datei_resource,groesse,herkunft) VALUES (meta_ID,da_ID,groess,herku);
+ ELSEIF isInserted>0 AND versionControlle>0 THEN
+ 	INSERT INTO metadaten(metadaten_id,datei_resource,groesse,herkunft,version) VALUES (meta_ID,da_ID,groess,herku,newVersion);
+  
+ END IF;
+ END;
+$BODY$;
